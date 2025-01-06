@@ -16,12 +16,19 @@ class DB{
         }
         return $tmp;
     }
-    function fetchAll(){
-        
+    protected function fetchAll($sql){
+        return $this->pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
-    function fetchOne(){
-        
+    protected function fetchOne($sql){
+        return $this->pdo->query($sql)->fetch(PDO::FETCH_ASSOC);
     }
+
+
+    
+    /**
+     * 取得多筆資料
+     */
+
     
     function all(...$arg){
         $sql="SELECT * FROM $this->table ";
