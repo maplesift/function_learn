@@ -16,13 +16,14 @@ class DB{
         return $tmp;
     }
 
+    protected function fetchOne($sql){
+        return $this->pdo->query($sql)->fetch(PDO::FETCH_ASSOC);            
+    }
     protected function fetchAll($sql){
-        return $this->pdo->query($sql)->fetchAll(PDO::FETCH__ASSOC);        
+        return $this->pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);        
     }
 
-    protected function fetchOne($sql){
-        return $this->pdo->query($sql)->fetch(PDO::FETCH__ASSOC);            
-    }
+
     function all(...$arg){
         $sql= "SELECT * FROM $this->table";
         if(!empty($arg[0])){
@@ -49,7 +50,7 @@ class DB{
                 $sql .= " WHERE `id`='$id'";
             }
 
-        return $this->fetch($sql);
+        return $this->fetchOne($sql);
     }
 
     function del($id){
@@ -58,13 +59,26 @@ class DB{
             $where=$this->a2s($id);
             $sql .= " WHERE ".join(" && ",$where  );
         }else{
-            $sql .= " WHERE  `id`='$id'"  ;
-            
+            $sql .= " WHERE `id`='$id' ";
         }
         return $this->pdo->exec($sql);
     }
 
-    function save(){}
+    function save($array){
+        // update
+        if(isset($array['id'])){
+            $id=$array['id'];
+            unset($array['id']);
+            $set=$this->a2s($array);
+            $sql ="UPDATE $this->table SET ".join(',',$set)." where `id`='$id'";
+        }else{
+            //insert
+            $cols=array_keys($array);
+            $sql="INSERT INTO $this->table (`".join("`,`",$cols)."`) VALUES('".join("','",$array)."')";        
+        }
+        
+        return $this->pdo->exec($sql);
+    }
 
     protected function math(){}
 
@@ -75,15 +89,16 @@ class DB{
 }
 
 // db外
-function to($url){
-    header("locatino:".$url);
+
+function q($sql){
+    $pdo=new PDO("mysql:host=localhost;charset=utf8;dbname=db03",'root','');
+    return $pdo->query($sql)->fetchAll();
 }
 function dd($array){
     echo "<pre>";
-    echo print_r($array);
+    print_r($array);
     echo "</pre>";
 }
-function q($sql){
-     $pdo=new PDO("mysql:host=localhost;charset=utf8;dbname=db03",'root','');
-     return $pdo->query($sql)->fetchAll();
-    }
+function to($url){
+    header("location:".$url);
+}
