@@ -80,11 +80,24 @@ class DB{
         return $this->pdo->exec($sql);
     }
 
-    protected function math(){}
+    protected function math($math,$col='id',$where=[]){
+        $sql="SELECT $math($col) FROM $this->table ";
+        if(!empty($where)){
+            $tmp=$this->a2s($where);
+            $sql .= " WHERE  " .join(" && ",$tmp);
+        }
+        return $this->pdo->query($sql)->fetchColumn();
+    }
 
-    function count(){}
-
-    function sum(){}
+    function max($col,$where=[]){
+        return $this->math('max',$col,$where);
+    }
+    function sum($col,$where=[]){
+        return $this->math('sum',$col,$where);
+    }
+    function count($where=[]){
+        return $this->math('count','*',$where);
+    }
 
 }
 
