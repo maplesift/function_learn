@@ -9,7 +9,11 @@ class DB{
         $this->pdo=new PDO($this->dsn,'root','');
     }
     protected function a2s($array){
-
+        $tmp=[];
+        foreach ($array as $key => $val) {
+            $tmp="`$key`='$val'";
+        }
+        return $tmp;
     }
     
     protected function fetchAll($sql){
@@ -19,11 +23,43 @@ class DB{
         return $this->pdo->query($sql)->fetch(PDO::FETCH_ASSOC);
     }
 
-    function all(){}
+    function all(...$arg){
+        $sql="SELECT * FROM $this->table";
+        if (!empty($arg[0])) {
+            if (is_array($arg[0])) {
+                $where=$this->a2s($arg[0]);
+                $sql .= " WHERE ".join(" && ",$where);
+            }else{
+                $sql .= $arg[0];
+            }
+        }
+        if(!empty($arg[1])){
+            $sql .= $arg[1];
+        }
+        return $this->fetchAll($sql);
+    }
 
-    function find(){}
+    function find($id){
+        $sql="SELECT * FROM $this->table";
+            if (is_array($id)) {
+                $where=$this->a2s($id);
+                $sql .= " WHERE ".join(" && ",$where);
+            }else{
+                $sql .= " WHERE  `id`='$id'";
+            }
+        return $this->fetchOne($sql);
+    }
 
-    function del(){}
+    function del($id){
+        $sql="DELETE FROM $this->table";
+            if (is_array($id)) {
+                $where=$this->a2s($id);
+                $sql .= " WHERE ".join(" && ",$where);
+            }else{
+                $sql .= " WHERE  `id`='$id'";
+            }
+        return $this->pdo->exec($sql);
+    }
 
     function save(){}
 
