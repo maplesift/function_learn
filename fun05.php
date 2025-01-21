@@ -64,15 +64,48 @@ class DB{
     }
     
 
-    function save($array){}
+    function save($array){
+        // update table set `1`='1',`2`='2' where `id`='id' 
+        if(isset($array['id'])){
+            $id=$array['id'];
+            unset($array['id']);
+            $set=$this->a2s($array);
+            $sql ="UPDATE $this->table set ".join(',',$array)." where `id`='$id'";
+        }else{
+            // insert into
+            $cols=array_keys($array);
+            $sql= "INSERT INTO $this->table (`".join("`,`",$cols)."`) VALUES('".join("','",$array)."') ";
+        }
+        return $this->pdo->exec($sql);
+    }
 
-    protected function math(){}
-    function count(){}
-    function sum(){}
+    protected function math($math,$col='id',$where=[]){
+        $sql= "SELECT $math($col) FROM $this->table";
+        if(!empty($where)){
+            $tmp=$this->a2s($where);
+            $sql .= " WHERE ".jion(" && ",$tmp);
+        }
+        return $this->pdo->query($sql)->fetchColumn();
+    }
+    function count($col,$where=[]){
+        return $this->math('count','*',$where);
+    }
+    function sum($col,$where=[]){
+        return $this->math('sum',$col,$where);
+    }
 }
 
 
 // db外
-function dd(){}
-function to(){}
-function q(){}
+function dd($array){
+    echo "<pre>";
+    print_r($array);
+    echo "</pre>";
+}
+function to($url){
+    header("location:".$url);
+}
+function q($sql){
+    $pdo=new PDO("mysql:host=localhost;charset=utf8;dbname=db03",'root','');
+    return $pdo->query($sql)->fetchAll();
+}
