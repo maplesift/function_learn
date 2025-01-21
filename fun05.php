@@ -1,8 +1,8 @@
 <?php
 class DB{
-    protected $table;
-    protected $pdo;
     protected $dsn="mysql:host=localhost;charset=utf8;dbname=db03";
+    protected $pdo;
+    protected $table;
 
     public function __construct($table) {
         $this->table = $table;
@@ -15,11 +15,11 @@ class DB{
         }
         return $tmp;
     }
-    protected function fetchAll($sql){
-        return $this->pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
-    }
     protected function fetchOne($sql){
         return $this->pdo->query($sql)->fetch(PDO::FETCH_ASSOC);
+    }
+    protected function fetchAll($sql){
+        return $this->pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
     
     function all(...$arg){
@@ -52,7 +52,7 @@ class DB{
     }
 
     function del($id){
-        $sql="DELETE * FROM $this->table";
+        $sql="DELETE  FROM $this->table";
 
         if(is_array($id)){
             $where= $this->a2s($id);
@@ -70,7 +70,7 @@ class DB{
             $id=$array['id'];
             unset($array['id']);
             $set=$this->a2s($array);
-            $sql ="UPDATE $this->table set ".join(',',$array)." where `id`='$id'";
+            $sql ="UPDATE $this->table SET ".join(',',$set)." where `id`='$id'";
         }else{
             // insert into
             $cols=array_keys($array);
@@ -83,11 +83,11 @@ class DB{
         $sql= "SELECT $math($col) FROM $this->table";
         if(!empty($where)){
             $tmp=$this->a2s($where);
-            $sql .= " WHERE ".jion(" && ",$tmp);
+            $sql .= " WHERE ".join(" && ",$tmp);
         }
         return $this->pdo->query($sql)->fetchColumn();
     }
-    function count($col,$where=[]){
+    function count($where=[]){
         return $this->math('count','*',$where);
     }
     function sum($col,$where=[]){
@@ -97,6 +97,10 @@ class DB{
 
 
 // db外
+function q($sql){
+    $pdo=new PDO("mysql:host=localhost;charset=utf8;dbname=db03",'root','');
+    return $pdo->query($sql)->fetchAll();
+}
 function dd($array){
     echo "<pre>";
     print_r($array);
@@ -104,8 +108,4 @@ function dd($array){
 }
 function to($url){
     header("location:".$url);
-}
-function q($sql){
-    $pdo=new PDO("mysql:host=localhost;charset=utf8;dbname=db03",'root','');
-    return $pdo->query($sql)->fetchAll();
 }
