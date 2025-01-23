@@ -71,12 +71,18 @@ class DB{
         // INSERT INTO table(``,``,``) VALUES('','','');
         else{
             $cols=array_keys($array);
-            $sql ="";
+            $sql ="INSERT INTO $this->table (`".join("`,`",$cols)."`) VALUES('".join("','",$array)."')";
         }
+        return $this->pdo->exec($sql);
     }
     
     protected function math($math,$col='id',$where=[]){
-
+        $sql = "SELECT $math($col) FROM $this->table";
+        if(!empty($where)){
+            $tmp= $this->a2s($where);
+            $sql .= " WHERE ".join(" && ",$tmp);
+        }
+        return $this->pdo->query($sql)->fetchColumn();
     }
     function count($where=[]){
 
@@ -86,13 +92,18 @@ class DB{
     }
 
 }
+
 // db外
 function q($sql){
-    
+    $pdo=new PDO("mysql:host=localhost;charset=utf8;dbname=db03",'root','');
 }
+
 function dd($array){
-    
+    echo "<pre>";
+    print_r($array);
+    echo "</pre>";
 }
+
 function to($url){
-    
+    header("location:".$url);
 }
